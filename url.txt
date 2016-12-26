@@ -108,3 +108,5 @@ http://tenhou.net/0/?log=2016122620gm-0009-4217-53f9c182&tw=0
 http://tenhou.net/0/?log=2016122620gm-0009-4217-b8b12bff&tw=0
 [2016/12/26/般南喰赤] A:hayashi4(+50.0) B:r_hirose(+6.0) C:留萌(-41.0) D:K.F.(-15.0)
 http://tenhou.net/0/?log=2016122621gm-0009-4217-c5c56c9c&tw=2
+[2016/12/26/般南喰赤] A:留萌(-11.0) B:K.F.(+50.0) C:hayashi4(+12.0) D:r_hirose(-51.0)
+http://tenhou.net/0/?log=2016122622gm-0009-4217-8e950e98&tw=0
