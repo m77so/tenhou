@@ -100,3 +100,11 @@ http://tenhou.net/0/?log=2016122515gm-0089-0000-d3b3caca&tw=1
 http://tenhou.net/0/?log=2016122516gm-0089-0000-d339c18e&tw=0
 [2016/12/25/上南喰赤] A:留萌(-50.0) B:Hacchi(-17.0) C:・かちこみ(+54.0) D:猫と僕と君(+13.0)
 http://tenhou.net/0/?log=2016122517gm-0089-0000-0e0acbf1&tw=0
+[2016/12/26/上南喰赤] A:留萌(-19.0) B:あーるけい(+11.0) C:izuyama(+53.0) D:Zou(-45.0)
+http://tenhou.net/0/?log=2016122619gm-0089-0000-9bb1eb53&tw=0
+[2016/12/26/般南喰赤] A:留萌(+18.0) B:K.F.(-5.0) C:hayashi4(+54.0) D:r_hirose(-67.0)
+http://tenhou.net/0/?log=2016122620gm-0009-4217-53f9c182&tw=0
+[2016/12/26/般南喰赤] A:留萌(-20.0) B:hayashi4(-34.0) C:r_hirose(+7.0) D:K.F.(+47.0)
+http://tenhou.net/0/?log=2016122620gm-0009-4217-b8b12bff&tw=0
+[2016/12/26/般南喰赤] A:hayashi4(+50.0) B:r_hirose(+6.0) C:留萌(-41.0) D:K.F.(-15.0)
+http://tenhou.net/0/?log=2016122621gm-0009-4217-c5c56c9c&tw=2
