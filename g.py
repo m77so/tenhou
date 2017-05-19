@@ -4,10 +4,15 @@ import urllib.request
 import urllib.parse
 import xml.etree.ElementTree as ET
 import math
+
 from enum import Enum
 from functools import cmp_to_key
 # https://gist.github.com/nullpos/d6a10e1f4b1f906d8b6d
-
+import io
+import sys
+sys.stdin = io.TextIOWrapper(sys.stdin.buffer, encoding='utf-8')
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 ARCHIVE_URL = 'http://e.mjv.jp/0/log/archived.cgi?'
 PLAIN_URL = 'http://e.mjv.jp/0/log/plainfiles.cgi?'
 
@@ -21,7 +26,7 @@ def pstr(num):
 #           "東", "南", "西", "北", "白", "發", "中"]
 #    return hai[num >> 2]
     num >>= 2
-    
+
     if num >= 27:
         num -= 27
         if num == 4:
@@ -29,7 +34,7 @@ def pstr(num):
         elif num == 6:
             num = 4
     num += 7
-    num = (num)+0x1f000
+    num = (num) + 0x1f000
 
     return chr(num)
 
@@ -154,6 +159,9 @@ class Game:
     def dapai(self, tag):
         self.current_round.zimo(ord(tag[0]) - 3 - 65, int(tag[1:]))
 
+    def ryuukyoku(self, attrib):
+        self.current_round.ryuukyoku(attrib)
+
 
 class Round:
     YAKU_FORMAL = [
@@ -221,6 +229,37 @@ class Round:
     def dapai(self, hito, pai):
         pass
 
+    def ba_tostr(self, b):
+        b = list(map(int, b.split(",")))
+        return 'リーチ棒{0}本,{1}本場'.format(b[0], b[1])
+
+    def sc_tostr(self, sc, *, owari=False):
+        text = ""
+        sc = list(map(float, sc.split(",")))
+        sc = list(zip(*[iter(sc)] * 2))
+        for k, s in enumerate(sc):
+            text += self.game.player[k].name + " " + str(int(s[0])) + "00 "
+            if s[1] != 0 and not owari:
+                text += ("(+"if s[1] > 0 else "(") + str(int(s[1])) + "00)"
+            elif owari:
+                text += ("(+"if s[1] > 0 else "(") + str(s[1]) + ")"
+            text += "\n"
+        return text
+
+    def ryuukyoku(self, attrib):
+        text = "流局"
+        for key in range(0, 3):
+            if "hai" + str(key) in attrib:
+                text += "\n"
+                for h in list(map(int, attrib["hai" + str(key)].split(","))):
+                    text += pstr(h)
+        text += "\n" + self.sc_tostr(attrib["sc"])
+        text += "\n" + self.ba_tostr(attrib["ba"])
+        if "owari" in attrib:
+            text += "\n" + self.owari(attrib["owari"])
+        print(text)
+        return text
+
     def agari(self, attrib):
         hai = list(map(int, attrib["hai"].split(",")))
         machi = int(attrib["machi"])
@@ -229,12 +268,11 @@ class Round:
         fromwho = int(attrib["fromWho"])
         yaku = list(map(int, attrib["yaku"].split(",")))
         yaku = zip(*[iter(yaku)] * 2)
-        sc = list(map(int, attrib["sc"].split(",")))
-        sc = list(zip(*[iter(sc)] * 2))
+        sc = attrib["sc"]
         m = list(map(int, attrib["m"].split(","))) if "m" in attrib else []
 
         dora = list(map(int, attrib["doraHai"].split(",")))
-        ba = list(map(int, attrib["ba"].split(",")))
+        ba = attrib["ba"]
 
         text = "ツモ " if who == fromwho else "ロン "
         text += self.game.player[who].name
@@ -288,13 +326,16 @@ class Round:
                 else:
                     text += self.YAKU[y[0]]
         text += "\n" + str(ten[0]) + "符" + str(han) + "翻" + str(ten[1]) + "点"
-        text += '\nリーチ棒{0}本,{1}本場\n'.format(ba[0], ba[1])
-        for k, s in enumerate(sc):
-            text += self.game.player[k].name + " " + str(s[0]) + "00 "
-            if s[1] != 0:
-                text += ("(+"if s[1] > 0 else "(") + str(s[1]) + "00)"
-            text += "\n"
+        text += "\n" + self.ba_tostr(ba) + "\n"
+        text += self.sc_tostr(sc)
+        if "owari" in attrib:
+            text += "\n" + self.owari(attrib["owari"])
         print(text)
+        return text
+
+    def owari(self, data):
+        text = "終局"
+        text += self.sc_tostr(data, owari=True)
         return text
 
 
@@ -330,12 +371,15 @@ def download(urlid):
             game.init(child.attrib)
         elif child.tag == "AGARI":
             game.agari(child.attrib)
-        elif (child.tag) in {"GO", "DORA"}:
+        elif (child.tag) in {"DORA"}:
             print(child.tag, child.attrib)
         elif (child.tag)[0] in {"T", "U", "V", "W"}:
             game.zimo(child.tag)
         elif (child.tag)[0] in {"D", "E", "F", "G"}:
             game.dapai(child.tag)
+        elif child.tag == "RYUUKYOKU":
+            print(child.attrib)
+            game.ryuukyoku(child.attrib)
         elif child.tag in {"SHUFFLE", "REACH", "N", "BYE"}:
             pass
         else:
@@ -345,4 +389,4 @@ def download(urlid):
 
 
 if __name__ == '__main__':
-    download("2017051200gm-0089-0000-a6392280")
+    download("2017042101gm-00c1-0000-4b052ac7")
