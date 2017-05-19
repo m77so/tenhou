@@ -1,0 +1,34 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+ARCHIVE_URL	../g.py	/^ARCHIVE_URL = 'http:\/\/e.mjv.jp\/0\/log\/archived.cgi?'$/;"	kind:variable	line:9
+DAN	../g.py	/^    DAN = [$/;"	kind:variable	line:45
+ET	../g.py	/^import xml.etree.ElementTree as ET$/;"	kind:namespace	line:5
+Game	../g.py	/^class Game:$/;"	kind:class	line:103
+PLAIN_URL	../g.py	/^PLAIN_URL = 'http:\/\/e.mjv.jp\/0\/log\/plainfiles.cgi?'$/;"	kind:variable	line:10
+Player	../g.py	/^class Player:$/;"	kind:class	line:44
+Round	../g.py	/^class Round:$/;"	kind:class	line:159
+__init__	../g.py	/^    def __init__(self):$/;"	kind:member	line:104
+__init__	../g.py	/^    def __init__(self, name):$/;"	kind:member	line:50
+__init__	../g.py	/^    def __init__(self, seed, ten):$/;"	kind:member	line:160
+agari	../g.py	/^    def agari(self, attrib):$/;"	kind:member	line:147
+agari	../g.py	/^    def agari(self, hai, machi, ten, yaku, *, m):$/;"	kind:member	line:165
+dapai	../g.py	/^def dapai(tag):$/;"	kind:function	line:35
+download	../g.py	/^def download(urlid):$/;"	kind:function	line:170
+etree	../g.py	/^import xml.etree.ElementTree as ET$/;"	kind:namespace	line:5
+fulou	../g.py	/^def fulou(val):$/;"	kind:function	line:54
+g.py	../g.py	1;"	kind:file	line:1
+go	../g.py	/^    def go(self, type):$/;"	kind:member	line:108
+init	../g.py	/^    def init(self, attrib):$/;"	kind:member	line:140
+math	../g.py	/^import math$/;"	kind:namespace	line:6
+pai	../g.py	/^def pai(num):$/;"	kind:function	line:13
+parse	../g.py	/^import urllib.parse$/;"	kind:namespace	line:4
+request	../g.py	/^import urllib.request$/;"	kind:namespace	line:3
+un	../g.py	/^    def un(self, attrib):$/;"	kind:member	line:132
+urllib	../g.py	/^import urllib.parse$/;"	kind:namespace	line:4
+urllib	../g.py	/^import urllib.request$/;"	kind:namespace	line:3
+xml	../g.py	/^import xml.etree.ElementTree as ET$/;"	kind:namespace	line:5
+zimo	../g.py	/^def zimo(tag):$/;"	kind:function	line:23
