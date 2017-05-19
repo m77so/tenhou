@@ -4,36 +4,39 @@ import urllib.request
 import urllib.parse
 import xml.etree.ElementTree as ET
 import math
+from enum import Enum
+from functools import cmp_to_key
 # https://gist.github.com/nullpos/d6a10e1f4b1f906d8b6d
 
 ARCHIVE_URL = 'http://e.mjv.jp/0/log/archived.cgi?'
 PLAIN_URL = 'http://e.mjv.jp/0/log/plainfiles.cgi?'
 
 
-def pai(num):
+def pstr(num):
     """牌を数字から文字列に変換する"""
 
-    hai = ["一", "二", "三", "四", "五", "六", "七", "八", "九",
-           "①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨",
-           "1", "2", "3", "4", "5", "6", "7", "8", "9",
-           "東", "南", "西", "北", "白", "發", "中"]
-    return hai[num >> 2]
+#    hai = ["一", "二", "三", "四", "五", "六", "七", "八", "九",
+#           "①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨",
+#           "1", "2", "3", "4", "5", "6", "7", "8", "9",
+#           "東", "南", "西", "北", "白", "發", "中"]
+#    return hai[num >> 2]
+    num >>= 2
+    
+    if num >= 27:
+        num -= 27
+        if num == 4:
+            num = 6
+        elif num == 6:
+            num = 4
+    num += 7
+    num = (num)+0x1f000
+
+    return chr(num)
 
 
-def zimo(tag):
-    """自摸"""
-
-    hito = chr(ord(tag[0]) - 19) + "さん"
-    str = pai(int(tag[1:]))
-    print(hito + "の自摸" + str)
-
-
-def dapai(tag):
-    """打牌"""
-
-    hito = chr(ord(tag[0]) - 3) + "さん"
-    str = pai(int(tag[1:]))
-    print(hito + "の打牌" + str)
+class Style(Enum):
+    CASUAL = 1
+    FORMAL = 2
 
 
 class Player:
@@ -54,66 +57,67 @@ def fulou(val):
         t = math.floor(t_10 / 3)
         r = t_10 % 3
         if r == 0:
-            return pai(t << 2) + pai((t + 1) << 2) + pai((t + 2) << 2)
+            return "\\" + pstr(t << 2) + pstr((t + 1) << 2) + pstr((t + 2) << 2)
         elif r == 1:
-            return pai((t + 1) << 2) + pai((t) << 2) + pai((t + 2) << 2)
+            return "\\" + pstr((t + 1) << 2) + pstr((t) << 2) + pstr((t + 2) << 2)
         elif r == 2:
-            return pai((t + 2) << 2) + pai((t) << 2) + pai((t + 1) << 2)
+            return "\\" + pstr((t + 2) << 2) + pstr((t) << 2) + pstr((t + 1) << 2)
     elif val & 0x8:
         # 刻子
         t = math.floor((val >> 9) / 3)
         kui = val & 0x3
         if kui == 1:
-            return pai(t << 2) + pai(t << 2) + "\\" + pai(t << 2)
+            return pstr(t << 2) + pstr(t << 2) + "\\" + pstr(t << 2)
         elif kui == 2:
-            return pai(t << 2) + "\\" + pai(t << 2) + pai(t << 2)
+            return pstr(t << 2) + "\\" + pstr(t << 2) + pstr(t << 2)
         elif kui == 3:
-            return "\\" + pai(t << 2) + pai(t << 2) + pai(t << 2)
+            return "\\" + pstr(t << 2) + pstr(t << 2) + pstr(t << 2)
     elif val & 0x10:
         # 加槓
         t = math.floor((val >> 9) / 3)
         kui = val & 0x3
         if kui == 1:
-            return pai(t << 2) + pai(t << 2) + \
-                "\\" + pai(t << 2) + "\\" + pai(t << 2)
+            return pstr(t << 2) + pstr(t << 2) + \
+                "\\" + pstr(t << 2) + "\\" + pstr(t << 2)
         elif kui == 2:
-            return pai(t << 2) + "\\" + pai(t << 2) \
-                               + "\\" + pai(t << 2) + pai(t << 2)
+            return pstr(t << 2) + "\\" + pstr(t << 2) \
+                + "\\" + pstr(t << 2) + pstr(t << 2)
         elif kui == 3:
-            return "\\" + pai(t << 2) + "\\" + pai(t << 2) \
-                + pai(t << 2) + pai(t << 2)
+            return "\\" + pstr(t << 2) + "\\" + pstr(t << 2) \
+                + pstr(t << 2) + pstr(t << 2)
     else:
         # 明槓・槓
         t = (val >> 10)
         kui = val & 0x3
         if kui == 1:
-            return pai(t << 2) + pai(t << 2) + pai(t << 2) + "\\" + pai(t << 2)
+            return pstr(t << 2) + pstr(t << 2) + pstr(t << 2) + "\\" + pstr(t << 2)
         elif kui == 2:
-            return pai(t << 2) + "\\" + pai(t << 2) + pai(t << 2) + pai(t << 2)
+            return pstr(t << 2) + "\\" + pstr(t << 2) + pstr(t << 2) + pstr(t << 2)
         elif kui == 3:
-            return "\\" + pai(t << 2) + pai(t << 2) + pai(t << 2) + pai(t << 2)
+            return "\\" + pstr(t << 2) + pstr(t << 2) + pstr(t << 2) + pstr(t << 2)
         else:
-            return pai(t << 2) + pai(t << 2) + pai(t << 2) + pai(t << 2)
+            return pstr(t << 2) + pstr(t << 2) + pstr(t << 2) + pstr(t << 2)
 
 
 class Game:
     def __init__(self):
         self.name = ""
         self.round = []
+        self.is_sanma = None
+        self.grade = None
+        self.type = ""
+        self.typecode = None
+        self.Style = Style.FORMAL
 
     def go(self, type):
-        self.type = ""
         self.typecode = type
-        if type & 0x10:
+        self.isSanma = True if type & 0x10 else False
+        self.grade = ((type & 0x80) >> 7) + ((type & 0x20) >> 4)
+
+        if self.isSanma:
             self.type += "三"
-        if type & 0xA0 == 0xA0:
-            self.type += "鳳"
-        elif type & 0x20:
-            self.type += "特"
-        elif type & 0x80:
-            self.type += "上"
-        else:
-            self.type += "般"
+
+        self.type += "般上特鳳"[self.grade]
         if type & 8:
             self.type += "南"
         else:
@@ -144,6 +148,12 @@ class Game:
 
         self.current_round.agari(attrib)
 
+    def zimo(self, tag):
+        self.current_round.zimo(ord(tag[0]) - 19 - 65, int(tag[1:]))
+
+    def dapai(self, tag):
+        self.current_round.zimo(ord(tag[0]) - 3 - 65, int(tag[1:]))
+
 
 class Round:
     YAKU_FORMAL = [
@@ -171,8 +181,8 @@ class Round:
     ]
     YAKU = [
         # 一飜
-        "ツモ", "立直", "一発", "槍槓", "嶺上開花",
-        "海底摸月", "河底撈魚", "平和", "断幺九", "一盃口",
+        "ツモ", "立直", "一発", "槍槓", "嶺上",
+        "海底", "河底", "平和", "断幺九", "一盃口",
         "東", "南", "西", "北",
         "東", "南", "西", "北",
         "白", "發", "中",
@@ -180,7 +190,7 @@ class Round:
         "ダブリー", "チートイ", "チャンタ", "一通", "三色",
         "三色同刻", "三槓子", "トイトイ", "三暗刻", "小三元", "混老頭",
         # 三飜
-        "リャンペー", "純チャン", "混一",
+        "二盃口", "純チャン", "混一",
         # 六飜
         "清一",
         # 満貫
@@ -203,7 +213,13 @@ class Round:
         self.seed = seed
         self.game = game
         self.init_ten = ten
-        print('{0}{1}本場'.format(self.KYOKU[seed[0]], seed[1]))
+        print('\n\n{0}{1}本場'.format(self.KYOKU[seed[0]], seed[1]))
+
+    def zimo(self, hito, pai):
+        pass
+
+    def dapai(self, hito, pai):
+        pass
 
     def agari(self, attrib):
         hai = list(map(int, attrib["hai"].split(",")))
@@ -213,37 +229,71 @@ class Round:
         fromwho = int(attrib["fromWho"])
         yaku = list(map(int, attrib["yaku"].split(",")))
         yaku = zip(*[iter(yaku)] * 2)
-        m = list(map(int, attrib["m"].split(","))
-                 ) if hasattr(attrib, "m") else []
+        sc = list(map(int, attrib["sc"].split(",")))
+        sc = list(zip(*[iter(sc)] * 2))
+        m = list(map(int, attrib["m"].split(","))) if "m" in attrib else []
+
         dora = list(map(int, attrib["doraHai"].split(",")))
         ba = list(map(int, attrib["ba"].split(",")))
 
-        text = "ツモ" if who == fromwho else "ロン"
+        text = "ツモ " if who == fromwho else "ロン "
         text += self.game.player[who].name
-        text += ("放銃" + self.game.player[fromwho].name) \
+        text += ("<-" + self.game.player[fromwho].name) \
             if who != fromwho else ""
         text += "\n"
         for h in hai:
-            text += pai(h)
+            if machi != h:
+                text += pstr(h)
         for f in m:
             text += " " + fulou(f)
-        text += " " + pai(machi)
-        text += "\n ドラ:"
+        text += " " + pstr(machi)
+        text += "  ドラ:"
 
         for h in dora:
-            text += pai(h)
+            text += pstr(h)
         if hasattr(attrib, "doraHaiUra"):
             uradora = attrib["doraHaiUra"].split(",")
             text += " 裏ドラ:"
             for h in uradora:
-                text += pai(h)
+                text += pstr(h)
         text += "\n"
         han = 0
+        casual_yaku = []
+
+        def cmp_casual(a, b):
+            a = a[0]
+            b = b[0]
+            if a == 0:
+                a = 6.5
+            if b == 0:
+                b = 6.5
+            if a < b:
+                return -1
+            elif a == b:
+                return 0
+            else:
+                return 1
         for y in yaku:
-            text += self.YAKU_FORMAL[y[0]] + " " + str(y[1]) + "翻" + "\n"
             han += y[1]
-        text += str(ten[0]) + "符" + str(han) + "翻" + str(ten[1]) + "点"
-        text += '\nリーチ棒{0}本,{1}本場'.format(ba[0], ba[1])
+            if self.game.print == Style.FORMAL:
+                text += self.YAKU_FORMAL[y[0]] + " " + str(y[1]) + "翻" + "\n"
+            elif self.game.print == Style.CASUAL:
+                casual_yaku.append(y)
+        sorted(casual_yaku, key=cmp_to_key(cmp_casual))
+        if self.game.print == Style.CASUAL:
+            for y in casual_yaku:
+                if y[0] >= 52:
+                    if y[1] >= 1:
+                        text += self.YAKU[y[0]] + str(y[1])
+                else:
+                    text += self.YAKU[y[0]]
+        text += "\n" + str(ten[0]) + "符" + str(han) + "翻" + str(ten[1]) + "点"
+        text += '\nリーチ棒{0}本,{1}本場\n'.format(ba[0], ba[1])
+        for k, s in enumerate(sc):
+            text += self.game.player[k].name + " " + str(s[0]) + "00 "
+            if s[1] != 0:
+                text += ("(+"if s[1] > 0 else "(") + str(s[1]) + "00)"
+            text += "\n"
         print(text)
         return text
 
@@ -262,19 +312,17 @@ def download(urlid):
             except urllib.error.HTTPError as e:
                 pass
     except urllib.error.URLError as e:
-        print(e.value)
+        pass
 
     XmlData = data.decode('utf-8')
     root = ET.fromstring(XmlData)
     game = Game()
-
+    game.print = Style.CASUAL
     for child in root:
-        print(child.tag, child.attrib)
         if child.tag == "GO":
             game.go(int(child.attrib["type"]))
             print(game.type)
         elif (child.tag)[0:2] == "UN":
-
             game.un(child.attrib)
         elif (child.tag) == "TAIKYOKU":
             pass
@@ -285,11 +333,14 @@ def download(urlid):
         elif (child.tag) in {"GO", "DORA"}:
             print(child.tag, child.attrib)
         elif (child.tag)[0] in {"T", "U", "V", "W"}:
-            zimo(child.tag)
+            game.zimo(child.tag)
         elif (child.tag)[0] in {"D", "E", "F", "G"}:
-            dapai(child.tag)
+            game.dapai(child.tag)
+        elif child.tag in {"SHUFFLE", "REACH", "N", "BYE"}:
+            pass
         else:
             print(child.tag, child.attrib)
+
     return
 
 
