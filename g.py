@@ -44,6 +44,86 @@ class Style(Enum):
     FORMAL = 2
 
 
+class Fulou:
+    class FulouType(Enum):
+        CHI = 1
+        PONG = 2
+        ANKAN = 3
+        MINKAN = 4
+        KAKAN = 5
+
+    def __init__(self, val):
+        self.pai = ""
+        self.type = None
+
+        if val & 0x4:
+            # 順
+            self.type = self.FulouType.CHI
+            t_10 = val >> 10
+            t = math.floor(t_10 / 3)
+            r = t_10 % 3
+            if r == 0:
+                self.pai = "\\" + pstr(t << 2) + pstr((t + 1) <<
+                                                      2) + pstr((t + 2) << 2)
+            elif r == 1:
+                self.pai = "\\" + pstr((t + 1) << 2) + \
+                    pstr((t) << 2) + pstr((t + 2) << 2)
+            elif r == 2:
+                self.pai = "\\" + pstr((t + 2) << 2) + \
+                    pstr((t) << 2) + pstr((t + 1) << 2)
+        elif val & 0x8:
+            # 刻子
+            self.type = self.FulouType.PONG
+            t = math.floor((val >> 9) / 3)
+            kui = val & 0x3
+            if kui == 1:
+                self.pai = pstr(t << 2) + pstr(t << 2) + "\\" + pstr(t << 2)
+            elif kui == 2:
+                self.pai = pstr(t << 2) + "\\" + pstr(t << 2) + pstr(t << 2)
+            elif kui == 3:
+                self.pai = "\\" + pstr(t << 2) + pstr(t << 2) + pstr(t << 2)
+        elif val & 0x10:
+            # 加槓
+            self.type = self.FulouType.KAKAN
+            t = math.floor((val >> 9) / 3)
+            kui = val & 0x3
+            if kui == 1:
+                self.pai = pstr(t << 2) + pstr(t << 2) + \
+                    "\\" + pstr(t << 2) + "\\" + pstr(t << 2)
+            elif kui == 2:
+                self.pai = pstr(t << 2) + "\\" + pstr(t << 2) \
+                    + "\\" + pstr(t << 2) + pstr(t << 2)
+            elif kui == 3:
+                self.pai = "\\" + pstr(t << 2) + "\\" + pstr(t << 2) \
+                    + pstr(t << 2) + pstr(t << 2)
+        else:
+            # 明槓・槓
+            self.type = self.FulouType.MINKAN
+            t = (val >> 10)
+            kui = val & 0x3
+            if kui == 1:
+                self.pai = pstr(t << 2) + pstr(t << 2) + \
+                    pstr(t << 2) + "\\" + pstr(t << 2)
+            elif kui == 2:
+                self.pai = pstr(t << 2) + "\\" + pstr(t << 2) + \
+                    pstr(t << 2) + pstr(t << 2)
+            elif kui == 3:
+                self.pai = "\\" + pstr(t << 2) + pstr(t << 2) + \
+                    pstr(t << 2) + pstr(t << 2)
+            else:
+                self.type = self.FulouType.ANKAN
+                self.pai = pstr(t << 2) + pstr(t << 2) + \
+                    pstr(t << 2) + pstr(t << 2)
+
+    def type_str(self):
+        if self.type == self.FulouType.PONG:
+            return "ポン"
+        elif self.type == self.FulouType.CHI:
+            return "チー"
+        else:
+            return "カン"
+
+
 class Player:
     """Player"""
     DAN = [
@@ -53,55 +133,6 @@ class Player:
 
     def __init__(self, name):
         self.name = urllib.parse.unquote(name)
-
-
-def fulou(val):
-    if val & 0x4:
-        # 順
-        t_10 = val >> 10
-        t = math.floor(t_10 / 3)
-        r = t_10 % 3
-        if r == 0:
-            return "\\" + pstr(t << 2) + pstr((t + 1) << 2) + pstr((t + 2) << 2)
-        elif r == 1:
-            return "\\" + pstr((t + 1) << 2) + pstr((t) << 2) + pstr((t + 2) << 2)
-        elif r == 2:
-            return "\\" + pstr((t + 2) << 2) + pstr((t) << 2) + pstr((t + 1) << 2)
-    elif val & 0x8:
-        # 刻子
-        t = math.floor((val >> 9) / 3)
-        kui = val & 0x3
-        if kui == 1:
-            return pstr(t << 2) + pstr(t << 2) + "\\" + pstr(t << 2)
-        elif kui == 2:
-            return pstr(t << 2) + "\\" + pstr(t << 2) + pstr(t << 2)
-        elif kui == 3:
-            return "\\" + pstr(t << 2) + pstr(t << 2) + pstr(t << 2)
-    elif val & 0x10:
-        # 加槓
-        t = math.floor((val >> 9) / 3)
-        kui = val & 0x3
-        if kui == 1:
-            return pstr(t << 2) + pstr(t << 2) + \
-                "\\" + pstr(t << 2) + "\\" + pstr(t << 2)
-        elif kui == 2:
-            return pstr(t << 2) + "\\" + pstr(t << 2) \
-                + "\\" + pstr(t << 2) + pstr(t << 2)
-        elif kui == 3:
-            return "\\" + pstr(t << 2) + "\\" + pstr(t << 2) \
-                + pstr(t << 2) + pstr(t << 2)
-    else:
-        # 明槓・槓
-        t = (val >> 10)
-        kui = val & 0x3
-        if kui == 1:
-            return pstr(t << 2) + pstr(t << 2) + pstr(t << 2) + "\\" + pstr(t << 2)
-        elif kui == 2:
-            return pstr(t << 2) + "\\" + pstr(t << 2) + pstr(t << 2) + pstr(t << 2)
-        elif kui == 3:
-            return "\\" + pstr(t << 2) + pstr(t << 2) + pstr(t << 2) + pstr(t << 2)
-        else:
-            return pstr(t << 2) + pstr(t << 2) + pstr(t << 2) + pstr(t << 2)
 
 
 class Game:
@@ -143,24 +174,31 @@ class Game:
             self.player.append(Player(attrib["n3"]))
 
     def init(self, attrib):
-        seed = list(map(int, attrib["seed"].split(",")))
-        ten = attrib["ten"].split(",")
+
         if hasattr(self, "current_round"):
             self.round.append(self.current_round)
-        self.current_round = Round(seed, ten, self)
+        self.current_round = Round()
+        return self.current_round.init(attrib, self)
 
     def agari(self, attrib):
 
-        self.current_round.agari(attrib)
+        return self.current_round.agari(attrib)
 
     def zimo(self, tag):
-        self.current_round.zimo(ord(tag[0]) - 19 - 65, int(tag[1:]))
+        return self.current_round.zimo(ord(tag[0]) - 19 - 65, int(tag[1:]))
 
     def dapai(self, tag):
-        self.current_round.zimo(ord(tag[0]) - 3 - 65, int(tag[1:]))
+        return self.current_round.dapai(ord(tag[0]) - 3 - 65, int(tag[1:]))
+
+    def naki(self, attrib):
+        return self.current_round.naki(int(attrib["who"]), int(attrib["m"]))
 
     def ryuukyoku(self, attrib):
-        self.current_round.ryuukyoku(attrib)
+        return self.current_round.ryuukyoku(attrib)
+    
+    def reach(self,attrib):
+        return self.current_round.reach(attrib)
+
 
 
 class Round:
@@ -217,21 +255,56 @@ class Round:
         "北1局", "北2局", "北3局", "北4局",
     ]
 
-    def __init__(self, seed, ten, game: Game):
+    class Mopai:
+        def __init__(self, hito: int, mo: int):
+            self.player = hito
+            self.id = id
+            self.junme = None
+            self.nokori = None
+            self.mo = None
+            self.dapai = None
+
+    def __init__(self):
+        self.seed = None
+        self.mopai = []
+        self.player_mopai = []
+
+    def init(self, attrib, game: Game):
+        seed = list(map(int, attrib["seed"].split(",")))
+        ten = list(map(int, attrib["ten"].split(",")))
         self.seed = seed
         self.game = game
         self.init_ten = ten
-        print('\n\n{0}{1}本場'.format(self.KYOKU[seed[0]], seed[1]))
+
+        for i in self.game.player:
+            self.player_mopai.append([])
+        hougaku = "東南西北"
+        sekijun = ""
+        for i, player in enumerate(self.game.player):
+            sekijun += '{0}:{1}({2}00) '.format(
+                hougaku[(-seed[0] + i) % 4], player.name, self.init_ten[i])
+        return ('\n\n{0}{1}本場 {2}'.format(self.KYOKU[seed[0]], seed[1], sekijun))
 
     def zimo(self, hito, pai):
-        pass
+        mopai = self.Mopai(hito, pai)
+        self.mopai.append(mopai)
+        self.player_mopai[hito].append(mopai)
+        mopai.junme = len(self.player_mopai[hito])
+        mopai.id = len(self.mopai)
 
     def dapai(self, hito, pai):
-        pass
+        self.mopai[-1].dapai = pai
+
+    def naki(self, who, m):
+        self.zimo(who, m)
+        f = Fulou(m)
+
+        return '{3} {0} {1}順目 {2}'.format(
+            self.game.player[who].name, len(self.player_mopai[who]), f.pai, f.type_str())
 
     def ba_tostr(self, b):
         b = list(map(int, b.split(",")))
-        return 'リーチ棒{0}本,{1}本場'.format(b[0], b[1])
+        return 'リーチ棒{0}本,{1}本場'.format(b[1], b[0])
 
     def sc_tostr(self, sc, *, owari=False):
         text = ""
@@ -245,6 +318,12 @@ class Round:
                 text += ("(+"if s[1] > 0 else "(") + str(s[1]) + ")"
             text += "\n"
         return text
+    
+    def reach(self,attrib):
+        step = int(attrib["step"])
+        who = int(attrib["who"])
+        if step == 1:
+            return "立直 {0} {1}順目".format(self.game.player[who].name, len(self.player_mopai[who]))
 
     def ryuukyoku(self, attrib):
         text = "流局"
@@ -257,7 +336,6 @@ class Round:
         text += "\n" + self.ba_tostr(attrib["ba"])
         if "owari" in attrib:
             text += "\n" + self.owari(attrib["owari"])
-        print(text)
         return text
 
     def agari(self, attrib):
@@ -278,12 +356,13 @@ class Round:
         text += self.game.player[who].name
         text += ("<-" + self.game.player[fromwho].name) \
             if who != fromwho else ""
+        text += ' {0}順目'.format(len(self.player_mopai[who]))
         text += "\n"
         for h in hai:
             if machi != h:
                 text += pstr(h)
         for f in m:
-            text += " " + fulou(f)
+            text += " " + Fulou(f).pai
         text += " " + pstr(machi)
         text += "  ドラ:"
 
@@ -305,12 +384,7 @@ class Round:
                 a = 6.5
             if b == 0:
                 b = 6.5
-            if a < b:
-                return -1
-            elif a == b:
-                return 0
-            else:
-                return 1
+            return -1 if a < b else (0 if a == b else 1)
         for y in yaku:
             han += y[1]
             if self.game.print == Style.FORMAL:
@@ -330,11 +404,10 @@ class Round:
         text += self.sc_tostr(sc)
         if "owari" in attrib:
             text += "\n" + self.owari(attrib["owari"])
-        print(text)
         return text
 
     def owari(self, data):
-        text = "終局"
+        text = "終局\n"
         text += self.sc_tostr(data, owari=True)
         return text
 
@@ -361,26 +434,33 @@ def download(urlid):
     game.print = Style.CASUAL
     for child in root:
         if child.tag == "GO":
-            game.go(int(child.attrib["type"]))
+            print(game.go(int(child.attrib["type"])))
             print(game.type)
         elif (child.tag)[0:2] == "UN":
-            game.un(child.attrib)
+            print(game.un(child.attrib))
         elif (child.tag) == "TAIKYOKU":
             pass
         elif child.tag == "INIT":
-            game.init(child.attrib)
+            print(game.init(child.attrib))
         elif child.tag == "AGARI":
-            game.agari(child.attrib)
-        elif (child.tag) in {"DORA"}:
-            print(child.tag, child.attrib)
+            print(game.agari(child.attrib))
+        elif child.tag in {"DORA"}:
+            #print(child.tag, child.attrib)
+            pass
+        elif child.tag == "REACH":
+            #print(child.attrib)
+            temp = game.reach(child.attrib)
+            if temp != None:
+                print(temp)
         elif (child.tag)[0] in {"T", "U", "V", "W"}:
             game.zimo(child.tag)
         elif (child.tag)[0] in {"D", "E", "F", "G"}:
             game.dapai(child.tag)
+        elif child.tag == "N":
+            print(game.naki(child.attrib))
         elif child.tag == "RYUUKYOKU":
-            print(child.attrib)
-            game.ryuukyoku(child.attrib)
-        elif child.tag in {"SHUFFLE", "REACH", "N", "BYE"}:
+            print(game.ryuukyoku(child.attrib))
+        elif child.tag in {"SHUFFLE", "REACH", "BYE"}:
             pass
         else:
             print(child.tag, child.attrib)
